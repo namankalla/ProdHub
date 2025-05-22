@@ -1,9 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link as RouterLink } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Music2, MapPin, Calendar, Link as LinkIcon, Mail, Edit, Settings } from 'lucide-react';
+import { Music2, MapPin, Calendar, Link as LinkIcon, Mail, Edit, Settings, ChevronDown, User, Users, Link2, GitFork, Folder } from 'lucide-react';
 import RepositoryCard from '../components/Repository/RepositoryCard';
 import { Link } from '../components/ui/Link';
+import { BackButton } from '../components/ui/BackButton';
+import { useAuth } from '../contexts/AuthContext';
+import { getUserRepositories, Repository } from '../firebase/repositories';
+import CountUp from 'react-countup';
+import { getUserProfile } from '../firebase/users';
 
 interface TabProps {
   active: boolean;
@@ -15,278 +20,234 @@ interface TabProps {
 const Tab: React.FC<TabProps> = ({ active, label, count, onClick }) => (
   <button
     onClick={onClick}
-    className={`px-4 py-2 -mb-px text-sm font-medium border-b-2 ${
-      active 
-        ? 'border-purple-500 text-purple-400' 
-        : 'border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-700'
+    className={`px-4 py-2 text-sm font-medium rounded-full transition-colors ${
+      active
+        ? 'bg-purple-500/20 text-purple-400 border border-purple-500/50'
+        : 'text-gray-400 hover:text-white border border-transparent'
     }`}
   >
     {label}
     {count !== undefined && (
-      <span className={`ml-2 py-0.5 px-1.5 rounded-full text-xs ${
-        active ? 'bg-purple-900/40 text-purple-300' : 'bg-gray-800 text-gray-400'
-      }`}>
+      <span className={`ml-2 ${active ? 'text-purple-400' : 'text-gray-500'}`}>
         {count}
       </span>
     )}
   </button>
 );
 
+const sidebarItems = [
+  { icon: <Folder />, label: 'Repositories', href: '/repositories' },
+  { icon: <GitFork />, label: 'Collaborations', href: '/collaborations' },
+  { icon: <Users />, label: 'Connects', href: '/connects' },
+  { icon: <User />, label: 'Profile', href: '/profile' },
+  { icon: <Settings />, label: 'Settings', href: '/settings' },
+];
+
 const ProfilePage: React.FC = () => {
   const { username } = useParams<{ username: string }>();
-  const [activeTab, setActiveTab] = useState('repositories');
-  
-  // Mock data for user profile
-  const userProfile = {
-    username: username || 'producer1',
-    displayName: 'Alex Producer',
-    bio: 'Music producer specializing in EDM and Trap. FL Studio enthusiast for over 8 years.',
-    location: 'Los Angeles, CA',
-    joined: 'March 2025',
-    website: 'https://producer.me',
-    email: 'alex@producer.me',
-    isCurrentUser: true
+  const { currentUser } = useAuth();
+  const [repositories, setRepositories] = useState<Repository[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showSettings, setShowSettings] = useState(false);
+  const [profile, setProfile] = useState<any>(null);
+  const avatarRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (currentUser?.uid) {
+        const userProfile = await getUserProfile(currentUser.uid);
+        setProfile(userProfile);
+      }
+    };
+    fetchProfile();
+  }, [currentUser]);
+
+  useEffect(() => {
+    const fetchRepos = async () => {
+      setLoading(true);
+      try {
+        if (currentUser?.uid) {
+          const repos = await getUserRepositories(currentUser.uid);
+          setRepositories(repos);
+        }
+      } catch (e) {
+        setRepositories([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchRepos();
+  }, [currentUser]);
+
+  // Use Firestore profile for all custom fields
+  const user = {
+    name: profile?.displayName || currentUser?.displayName || 'User Name',
+    username: profile?.username || 'username',
+    avatar: profile?.avatarUrl || currentUser?.photoURL || 'https://randomuser.me/api/portraits/lego/1.jpg',
+    bio: profile?.bio || '',
+    followers: 0,
+    following: 0,
+    connects: 0,
+    role: 'Music Producer',
   };
-  
-  // Mock data for repositories
-  const repositories = [
-    {
-      title: "EDM-Festival-Banger",
-      description: "An energetic EDM track designed for festival main stages. Features a massive drop and vocal chops.",
-      username: username || 'producer1',
-      stars: 132,
-      forks: 19,
-      lastUpdated: "1 week ago",
-      genre: "EDM",
-      bpm: 128
-    },
-    {
-      title: "Trap-Beat-Collection",
-      description: "A collection of trap beats with heavy 808s and unique percussion. Looking for vocal collaborators.",
-      username: username || 'producer1',
-      stars: 89,
-      forks: 12,
-      lastUpdated: "5 days ago",
-      genre: "Trap",
-      bpm: 140
-    },
-    {
-      title: "Lo-Fi-Chill-Beats",
-      description: "Relaxing lo-fi hip hop beats perfect for studying or chilling. Features vinyl crackles and jazz samples.",
-      username: username || 'producer1',
-      stars: 67,
-      forks: 8,
-      lastUpdated: "2 weeks ago",
-      genre: "Lo-Fi",
-      bpm: 85
-    }
+
+  // Settings dropdown close on outside click
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (avatarRef.current && !avatarRef.current.contains(e.target as Node)) {
+        setShowSettings(false);
+      }
+    };
+    if (showSettings) document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [showSettings]);
+
+  // Stats for cards
+  const stats = [
+    { label: 'Total Repositories', count: repositories.length, icon: <Folder className="h-5 w-5 text-purple-400" /> },
+    { label: 'Projects', count: repositories.length, icon: <Music2 className="h-5 w-5 text-cyan-400" /> },
+    { label: 'Collaborations', count: 0, icon: <GitFork className="h-5 w-5 text-green-400" /> },
   ];
-  
-  // Mock data for forks
-  const forks = [
-    {
-      title: "Deep-House-Project",
-      description: "A deep house track with complex layering and custom synths. I've added a new breakdown section.",
-      username: "beatmaker99",
-      stars: 3,
-      forks: 0,
-      lastUpdated: "1 day ago",
-      genre: "Deep House",
-      bpm: 124
-    }
+
+  // Social stats
+  const socialStats = [
+    { label: 'Followers', count: user.followers, href: '/followers' },
+    { label: 'Following', count: user.following, href: '/following' },
+    { label: 'Connects', count: user.connects, href: '/connects' },
   ];
 
   return (
-    <div className="min-h-screen bg-gray-900 py-8 px-4">
-      <div className="container mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Profile Sidebar */}
-          <motion.div
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-purple-900 flex flex-col">
+      <div className="flex-1 flex flex-col min-h-screen">
+        {/* Header with glassmorphism and motion */}
+        <motion.header
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="sticky top-0 z-20 flex items-center justify-between px-10 py-6 border-b border-gray-800 backdrop-blur bg-gray-900/70"
+        >
+          <h2 className="text-2xl font-bold text-white">User Profile</h2>
+          <div className="flex items-center gap-4 relative">
+            <input
+              type="text"
+              placeholder="Search"
+              className="bg-gray-800 rounded-lg px-4 py-2 text-white outline-none border border-gray-700 focus:border-purple-500 transition-colors"
+              style={{ minWidth: 200 }}
+            />
+            <div ref={avatarRef} className="relative">
+              <img
+                src={user.avatar}
+                alt={user.name}
+                className="w-10 h-10 rounded-full border-2 border-gray-700 object-cover cursor-pointer"
+                onClick={() => setShowSettings((v) => !v)}
+              />
+              <button
+                className="absolute right-0 top-0 bg-gray-800/80 rounded-full p-1 border border-gray-700"
+                onClick={() => setShowSettings((v) => !v)}
+              >
+                <ChevronDown className="h-4 w-4 text-gray-400" />
+              </button>
+              {showSettings && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="absolute right-0 mt-2 w-48 bg-gray-800 border border-gray-700 rounded-lg shadow-lg z-50"
+                >
+                  <RouterLink to="/edit-profile" className="block px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-t-lg">Edit Profile</RouterLink>
+                  <RouterLink to="/settings" className="block px-4 py-2 text-gray-300 hover:bg-gray-700">Settings</RouterLink>
+                  <button className="w-full text-left px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-b-lg">Logout</button>
+                </motion.div>
+              )}
+            </div>
+          </div>
+        </motion.header>
+        {/* Main Content */}
+        <div className="flex-1 flex flex-col lg:flex-row gap-8 p-6 md:p-10 bg-gray-900/80">
+          {/* Profile Card */}
+          <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-            className="lg:col-span-1"
+            transition={{ duration: 0.4 }}
+            className="w-full max-w-md bg-gray-800/50 rounded-xl border border-gray-700/50 p-8 flex flex-col items-center shadow-lg relative mx-auto lg:mx-0"
           >
-            <div className="sticky top-24">
-              <div className="flex flex-col items-center lg:items-start">
-                <div className="h-24 w-24 rounded-full overflow-hidden border-4 border-gray-800 mb-4">
-                  <img
-                    src="https://images.pexels.com/photos/7149165/pexels-photo-7149165.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=96&w=96"
-                    alt={userProfile.displayName}
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-                
-                <h1 className="text-2xl font-bold text-white mb-1">{userProfile.displayName}</h1>
-                <h2 className="text-lg text-gray-400 mb-4">@{userProfile.username}</h2>
-                
-                {userProfile.isCurrentUser ? (
-                  <div className="flex space-x-2 w-full mb-6">
-                    <button className="flex-1 flex items-center justify-center space-x-1 bg-gray-800 hover:bg-gray-750 text-white py-2 px-4 rounded-md transition-colors border border-gray-700">
-                      <Edit className="h-4 w-4" />
-                      <span>Edit profile</span>
-                    </button>
-                    <button className="w-10 h-10 flex items-center justify-center bg-gray-800 hover:bg-gray-750 text-white rounded-md transition-colors border border-gray-700">
-                      <Settings className="h-4 w-4" />
-                    </button>
+            {/* Avatar */}
+            <img src={user.avatar} alt={user.name} className="w-40 h-40 rounded-full object-cover border-4 border-purple-600 shadow-lg mb-4" />
+            {/* Name, Username, Role, Bio */}
+            <div className="text-2xl font-bold text-white mb-1">{user.name}</div>
+            <div className="text-gray-400 text-base mb-1">@{user.username}</div>
+            <div className="text-purple-400 text-sm mb-2 font-semibold">{user.role}</div>
+            {user.bio && (
+              <div className="text-gray-300 text-sm mb-4 text-center w-full break-words">{user.bio}</div>
+            )}
+            {/* Social Stats as cards */}
+            <div className="grid grid-cols-3 gap-4 mt-4 w-full">
+              {socialStats.map((item) => (
+                <RouterLink
+                  key={item.label}
+                  to={item.href}
+                  className="text-center p-3 rounded-lg bg-gray-700/40 border border-gray-700 hover:border-purple-500 transition group"
+                >
+                  <div className="text-xl font-bold text-white group-hover:text-purple-400 transition-colors">
+                    <CountUp end={item.count} duration={1} />
                   </div>
-                ) : (
-                  <button className="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-md transition-colors mb-6">
-                    Follow
-                  </button>
-                )}
-                
-                <div className="w-full space-y-4">
-                  {userProfile.bio && (
-                    <p className="text-gray-300">{userProfile.bio}</p>
-                  )}
-                  
-                  <div className="space-y-2">
-                    {userProfile.location && (
-                      <div className="flex items-center text-gray-400">
-                        <MapPin className="h-4 w-4 mr-2" />
-                        <span>{userProfile.location}</span>
-                      </div>
-                    )}
-                    
-                    {userProfile.website && (
-                      <div className="flex items-center text-gray-400">
-                        <LinkIcon className="h-4 w-4 mr-2" />
-                        <a href={userProfile.website} className="text-purple-400 hover:underline truncate" target="_blank" rel="noopener noreferrer">
-                          {userProfile.website.replace(/(^\w+:|^)\/\//, '')}
-                        </a>
-                      </div>
-                    )}
-                    
-                    {userProfile.email && (
-                      <div className="flex items-center text-gray-400">
-                        <Mail className="h-4 w-4 mr-2" />
-                        <a href={`mailto:${userProfile.email}`} className="text-purple-400 hover:underline truncate">
-                          {userProfile.email}
-                        </a>
-                      </div>
-                    )}
-                    
-                    <div className="flex items-center text-gray-400">
-                      <Calendar className="h-4 w-4 mr-2" />
-                      <span>Joined {userProfile.joined}</span>
-                    </div>
+                  <div className="text-sm text-gray-400 group-hover:text-purple-400 transition-colors">{item.label}</div>
+                </RouterLink>
+              ))}
+            </div>
+          </motion.section>
+          {/* Main Cards/Sections */}
+          <div className="flex-1 flex flex-col gap-8">
+            {/* Stats Cards Row */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="grid grid-cols-1 md:grid-cols-3 gap-6"
+            >
+              {stats.map((item) => (
+                <div key={item.label} className="bg-gray-800/50 border border-gray-700/60 rounded-xl p-6 shadow-sm hover:shadow-purple-500/20 transition flex flex-col items-center">
+                  <div className="mb-2">{item.icon}</div>
+                  <div className="text-3xl font-bold text-white">
+                    <CountUp end={item.count} duration={1.2} />
                   </div>
+                  <div className="text-sm text-gray-400">{item.label}</div>
                 </div>
+              ))}
+            </motion.div>
+            {/* Repositories Section */}
+            <motion.section
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="flex-1 bg-gray-800/50 rounded-xl border border-gray-700/50 p-6"
+            >
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-white font-semibold">Repositories</h3>
+                <RouterLink to="/repositories" className="text-purple-400 hover:underline text-sm">View All</RouterLink>
               </div>
-            </div>
-          </motion.div>
-          
-          {/* Main Content */}
-          <div className="lg:col-span-3">
-            {/* Tabs Navigation */}
-            <div className="border-b border-gray-700 mb-6">
-              <div className="flex space-x-4">
-                <Tab
-                  active={activeTab === 'repositories'}
-                  label="Repositories"
-                  count={repositories.length}
-                  onClick={() => setActiveTab('repositories')}
-                />
-                
-                <Tab
-                  active={activeTab === 'forks'}
-                  label="Forks"
-                  count={forks.length}
-                  onClick={() => setActiveTab('forks')}
-                />
-                
-                <Tab
-                  active={activeTab === 'stars'}
-                  label="Stars"
-                  count={5}
-                  onClick={() => setActiveTab('stars')}
-                />
-                
-                <Tab
-                  active={activeTab === 'followers'}
-                  label="Followers"
-                  count={12}
-                  onClick={() => setActiveTab('followers')}
-                />
-                
-                <Tab
-                  active={activeTab === 'following'}
-                  label="Following"
-                  count={8}
-                  onClick={() => setActiveTab('following')}
-                />
-              </div>
-            </div>
-            
-            {/* Content based on active tab */}
-            {activeTab === 'repositories' && (
-              <div>
-                <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-xl font-semibold text-white">Repositories</h2>
-                  {userProfile.isCurrentUser && (
-                    <Link href="/new" className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-md text-white transition-colors">
-                      New
-                    </Link>
-                  )}
-                </div>
-                
+              {loading ? (
+                <div className="text-gray-400 text-sm">Loading repositories...</div>
+              ) : repositories.length === 0 ? (
+                <p className="text-gray-500 text-sm">No repositories found.</p>
+              ) : (
                 <div className="space-y-4">
-                  {repositories.map((repo, index) => (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.05, duration: 0.3 }}
-                    >
-                      <RepositoryCard {...repo} />
-                    </motion.div>
+                  {repositories.map(repo => (
+                    <RepositoryCard key={repo.id} {...repo} />
                   ))}
                 </div>
-              </div>
-            )}
-            
-            {activeTab === 'forks' && (
-              <div>
-                <h2 className="text-xl font-semibold text-white mb-6">Forked Repositories</h2>
-                <div className="space-y-4">
-                  {forks.map((repo, index) => (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.05, duration: 0.3 }}
-                    >
-                      <RepositoryCard {...repo} />
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
-            )}
-            
-            {activeTab === 'stars' && (
-              <div className="text-center py-12">
-                <Music2 className="h-16 w-16 text-gray-600 mx-auto mb-4" />
-                <h3 className="text-xl font-medium text-white mb-2">No starred repositories yet</h3>
-                <p className="text-gray-400">
-                  {userProfile.isCurrentUser 
-                    ? "You haven't starred any repositories yet."
-                    : `${userProfile.displayName} hasn't starred any repositories yet.`}
-                </p>
-              </div>
-            )}
-            
-            {(activeTab === 'followers' || activeTab === 'following') && (
-              <div className="text-center py-12">
-                <Music2 className="h-16 w-16 text-gray-600 mx-auto mb-4" />
-                <h3 className="text-xl font-medium text-white mb-2">
-                  {activeTab === 'followers' ? 'Follower list' : 'Following list'} coming soon
-                </h3>
-                <p className="text-gray-400">
-                  This feature is currently in development.
-                </p>
-              </div>
-            )}
+              )}
+            </motion.section>
+            {/* Placeholder for activity heatmap/calendar */}
+            <motion.section
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="flex-1 bg-gray-800/50 rounded-xl border border-gray-700/50 p-6"
+            >
+              <div className="text-white font-semibold mb-2">Activity</div>
+              <div className="h-32 flex items-center justify-center text-gray-500">(Activity heatmap/calendar coming soon)</div>
+            </motion.section>
           </div>
         </div>
       </div>
