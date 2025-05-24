@@ -1,120 +1,111 @@
 import React, { useState } from 'react';
-import { Search, User, Bell, Menu, X, Github, Music } from 'lucide-react';
-import { Link } from './ui/Link';
+import { Search, Bell, Menu, X, FolderPlus, Music, MessageSquare, GitPullRequest, HelpCircle, Settings, LogOut, UserCircle, GitFork, Activity, Plus, Compass, TrendingUp, ChevronDown } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useAuth } from '../contexts/AuthContext';
 
 const Navbar: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [showNewMenu, setShowNewMenu] = useState(false);
+  const { currentUser, logout } = useAuth();
+  const navigate = useNavigate();
+  const [showSettings, setShowSettings] = useState(false);
+  
+  const isWelcomePage = location.pathname === '/';
+  const isAuthPage = location.pathname.startsWith('/auth/');
+
+  if (isWelcomePage || isAuthPage) {
+    return null;
+  }
+
+  const handleLogoClick = () => {
+    if (!isWelcomePage && !isAuthPage) {
+      navigate('/home');
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/auth/signin');
+    } catch (error) {
+      console.error('Failed to log out:', error);
+    }
+  };
 
   return (
-    <nav className="bg-gray-900 text-white shadow-md sticky top-0 z-50">
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between py-4">
-          {/* Logo */}
-          <div className="flex items-center space-x-2">
-            <Music className="h-8 w-8 text-purple-500" />
-            <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-cyan-400">
-              ProdHub
-            </span>
-          </div>
+    <motion.header
+      initial={{ y: -100 }}
+      animate={{ y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="sticky top-0 z-20 flex items-center justify-between px-10 py-6 border-b border-gray-800 backdrop-blur-xl bg-gray-900/70"
+    >
+      <Link to="/home" className="text-2xl font-bold text-white hover:text-purple-400 transition-colors">
+        ProdHub
+      </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-6">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search repositories..."
-                className="bg-gray-800 text-gray-200 rounded-full py-2 px-4 pl-10 w-64 focus:outline-none focus:ring-2 focus:ring-purple-500"
-              />
-              <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-            </div>
-            <Link href="/explore" className="hover:text-purple-400 transition-colors">
-              Explore
-            </Link>
-            <Link href="/trending" className="hover:text-purple-400 transition-colors">
-              Trending
-            </Link>
-            <Link href="/new" className="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-md transition-colors">
-              + New
-            </Link>
-          </div>
-
-          {/* User Menu */}
-          <div className="hidden md:flex items-center space-x-4">
-            <Bell className="h-6 w-6 text-gray-300 hover:text-white cursor-pointer" />
-            <div className="flex items-center space-x-2 cursor-pointer">
-              <div className="h-8 w-8 bg-gray-700 rounded-full overflow-hidden">
-                <img
-                  src="https://images.pexels.com/photos/7149165/pexels-photo-7149165.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=32&w=32"
-                  alt="User"
-                  className="h-full w-full object-cover"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Mobile menu button */}
-          <div className="md:hidden">
-            <button 
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="text-gray-300 hover:text-white"
-            >
-              {isMenuOpen ? (
-                <X className="h-6 w-6" />
-              ) : (
-                <Menu className="h-6 w-6" />
-              )}
-            </button>
-          </div>
+      <div className="flex items-center gap-6">
+        <Link to="/notifications" className="text-gray-400 hover:text-white transition-colors">
+          <Bell className="h-6 w-6" />
+              </Link>
+        <Link to="/messages" className="text-gray-400 hover:text-white transition-colors">
+          <MessageSquare className="h-6 w-6" />
+              </Link>
+        
+        {/* Avatar with Settings Dropdown */}
+              <div className="relative">
+                <button
+            onClick={() => setShowSettings(!showSettings)}
+            className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
+          >
+            <img
+              src={currentUser?.photoURL || 'https://via.placeholder.com/40'}
+              alt="Profile"
+              className="h-10 w-10 rounded-full border-2 border-gray-700 hover:border-purple-500 transition-colors"
+            />
+            <ChevronDown className={`h-4 w-4 transition-transform ${showSettings ? 'rotate-180' : ''}`} />
+                    </button>
+                    
+                    <AnimatePresence>
+            {showSettings && (
+                        <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
+                transition={{ duration: 0.2 }}
+                className="absolute right-0 mt-2 w-48 bg-gray-800/90 backdrop-blur-xl rounded-lg shadow-lg border border-gray-700 overflow-hidden"
+                        >
+                <div className="py-1">
+                              <Link 
+                    to="/profile"
+                    className="flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:bg-gray-700"
+                              >
+                    <UserCircle className="h-4 w-4" />
+                    Profile
+                              </Link>
+                                <Link 
+                    to="/settings"
+                    className="flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:bg-gray-700"
+                  >
+                    <Settings className="h-4 w-4" />
+                              Settings
+                            </Link>
+                            <button
+                              onClick={handleLogout}
+                    className="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-400 hover:bg-gray-700"
+                            >
+                    <LogOut className="h-4 w-4" />
+                    Logout
+                            </button>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
         </div>
       </div>
-
-      {/* Mobile Navigation */}
-      {isMenuOpen && (
-        <div className="md:hidden bg-gray-800 py-4 px-4 animate-fadeIn">
-          <div className="flex items-center mb-4">
-            <input
-              type="text"
-              placeholder="Search repositories..."
-              className="bg-gray-700 text-gray-200 rounded-full py-2 px-4 pl-10 w-full focus:outline-none focus:ring-2 focus:ring-purple-500"
-            />
-            <Search className="absolute left-7 top-[4.7rem] h-5 w-5 text-gray-400" />
-          </div>
-          <ul className="space-y-4">
-            <li>
-              <Link href="/explore" className="block py-2 hover:text-purple-400 transition-colors">
-                Explore
-              </Link>
-            </li>
-            <li>
-              <Link href="/trending" className="block py-2 hover:text-purple-400 transition-colors">
-                Trending
-              </Link>
-            </li>
-            <li>
-              <Link href="/new" className="block py-2 text-center bg-purple-600 hover:bg-purple-700 px-4 rounded-md transition-colors">
-                + New Repository
-              </Link>
-            </li>
-          </ul>
-          <div className="mt-6 pt-6 border-t border-gray-700">
-            <div className="flex items-center space-x-4 py-2">
-              <div className="h-10 w-10 bg-gray-700 rounded-full overflow-hidden">
-                <img
-                  src="https://images.pexels.com/photos/7149165/pexels-photo-7149165.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=40&w=40"
-                  alt="User"
-                  className="h-full w-full object-cover"
-                />
-              </div>
-              <span className="font-medium">Producer1</span>
-            </div>
-            <div className="flex items-center space-x-4 py-2 text-gray-300">
-              <Bell className="h-6 w-6" />
-              <span>Notifications</span>
-            </div>
-          </div>
-        </div>
-      )}
-    </nav>
+    </motion.header>
   );
 };
 

@@ -1,57 +1,38 @@
 import React from 'react';
 import { Star, GitBranch, Music2 } from 'lucide-react';
 import { Link } from '../ui/Link';
+import { Repository } from '../../firebase/repositories';
+import { formatDistanceToNow } from 'date-fns';
 
-interface RepositoryCardProps {
-  title: string;
-  description: string;
-  username: string;
-  stars: number;
-  forks: number;
-  lastUpdated: string;
-  genre?: string;
-  bpm?: number;
-}
+interface RepositoryCardProps extends Repository {}
 
 const RepositoryCard: React.FC<RepositoryCardProps> = ({
-  title,
+  id,
+  name,
   description,
-  username,
+  ownerUsername,
   stars,
   forks,
-  lastUpdated,
   genre,
-  bpm
+  bpm,
+  updatedAt
 }) => {
+  const lastUpdated = updatedAt ? formatDistanceToNow(updatedAt.toDate(), { addSuffix: true }) : '';
+
   return (
-    <div className="bg-gray-800 border border-gray-700 rounded-lg p-5 hover:border-purple-500 transition-all duration-300 shadow-md hover:shadow-purple-900/20">
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center space-x-2">
-          <Music2 className="h-5 w-5 text-purple-400" />
-          <Link href={`/${username}/${title}`} className="text-xl font-semibold text-white hover:text-purple-400 transition-colors">
-            {username} / {title}
+    <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6 hover:bg-gray-750/50 transition-colors">
+      <div className="flex items-start justify-between">
+        <div>
+          <Link href={`/${ownerUsername}/${id}`} className="text-lg font-semibold text-white hover:text-purple-400 transition-colors">
+            {name}
           </Link>
+          <div className="mt-1 text-sm text-gray-400">
+            <Link href={`/${ownerUsername}`} className="hover:text-purple-400 transition-colors">
+              {ownerUsername}
+            </Link>
+          </div>
         </div>
-      </div>
-      
-      <p className="text-gray-300 mb-4 line-clamp-2">{description}</p>
-      
-      {/* Music metadata */}
-      <div className="flex flex-wrap gap-2 mb-4">
-        {genre && (
-          <span className="px-2 py-1 bg-gray-700 text-gray-300 text-xs rounded-full">
-            {genre}
-          </span>
-        )}
-        {bpm && (
-          <span className="px-2 py-1 bg-gray-700 text-gray-300 text-xs rounded-full">
-            {bpm} BPM
-          </span>
-        )}
-      </div>
-      
-      <div className="flex items-center text-sm text-gray-400 justify-between">
-        <div className="flex space-x-4">
+        <div className="flex items-center space-x-4 text-sm text-gray-400">
           <span className="flex items-center space-x-1">
             <Star className="h-4 w-4" />
             <span>{stars}</span>
@@ -61,7 +42,23 @@ const RepositoryCard: React.FC<RepositoryCardProps> = ({
             <span>{forks}</span>
           </span>
         </div>
-        <span>Updated {lastUpdated}</span>
+      </div>
+
+      <p className="mt-4 text-gray-300">{description}</p>
+
+      <div className="mt-6 flex items-center justify-between text-sm">
+        <div className="flex items-center space-x-4 text-gray-400">
+          {genre && (
+            <span className="flex items-center space-x-1">
+              <Music2 className="h-4 w-4" />
+              <span>{genre}</span>
+            </span>
+          )}
+          {bpm && <span>{bpm} BPM</span>}
+        </div>
+        {lastUpdated && (
+          <span className="text-gray-500">Updated {lastUpdated}</span>
+        )}
       </div>
     </div>
   );

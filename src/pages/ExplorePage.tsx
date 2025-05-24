@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Search, Filter, Music2 } from 'lucide-react';
 import RepositoryCard from '../components/Repository/RepositoryCard';
+import { getRepositories, Repository } from '../firebase/repositories';
 
 interface FilterOptions {
   genre: string;
@@ -11,6 +12,7 @@ interface FilterOptions {
 
 const ExplorePage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [repositories, setRepositories] = useState<Repository[]>([]);
   const [filters, setFilters] = useState<FilterOptions>({
     genre: 'all',
     bpmRange: [0, 200],
@@ -18,78 +20,27 @@ const ExplorePage: React.FC = () => {
   });
   const [showFilters, setShowFilters] = useState(false);
   
-  // Mock data for repositories
-  const repositories = [
-    {
-      title: "Deep-House-Project",
-      description: "A deep house track with complex layering and custom synths. Ready for collaboration on the drop section.",
-      username: "beatmaker99",
-      stars: 154,
-      forks: 28,
-      lastUpdated: "3 days ago",
-      genre: "Deep House",
-      bpm: 124
-    },
-    {
-      title: "Trap-Beat-Collection",
-      description: "A collection of trap beats with heavy 808s and unique percussion. Looking for vocal collaborators.",
-      username: "trapgod5000",
-      stars: 89,
-      forks: 12,
-      lastUpdated: "5 days ago",
-      genre: "Trap",
-      bpm: 140
-    },
-    {
-      title: "Synthwave-80s-Tribute",
-      description: "A synthwave project inspired by the 80s with analog synth modeling and retro drums.",
-      username: "retrowave",
-      stars: 212,
-      forks: 34,
-      lastUpdated: "1 week ago",
-      genre: "Synthwave",
-      bpm: 110
-    },
-    {
-      title: "Lo-Fi-Study-Beats",
-      description: "A collection of lo-fi hip hop beats perfect for studying or relaxing. Uses sampled vinyl and jazz elements.",
-      username: "chillmaster",
-      stars: 187,
-      forks: 42,
-      lastUpdated: "2 days ago",
-      genre: "Lo-Fi",
-      bpm: 85
-    },
-    {
-      title: "EDM-Festival-Banger",
-      description: "An energetic EDM track designed for festival main stages. Features a massive drop and vocal chops.",
-      username: "edmking",
-      stars: 132,
-      forks: 19,
-      lastUpdated: "1 week ago",
-      genre: "EDM",
-      bpm: 128
-    },
-    {
-      title: "Ambient-Soundscape",
-      description: "An ambient soundscape with field recordings and generative synth patterns. Perfect for film scoring.",
-      username: "ambientdesigner",
-      stars: 76,
-      forks: 8,
-      lastUpdated: "4 days ago",
-      genre: "Ambient",
-      bpm: 60
-    }
-  ];
+  useEffect(() => {
+    const loadRepositories = async () => {
+      try {
+        const repos = await getRepositories(10);
+        setRepositories(repos);
+      } catch (error) {
+        console.error('Error loading repositories:', error);
+      }
+    };
+
+    loadRepositories();
+  }, []);
   
   const genres = ['All', 'Deep House', 'Trap', 'Synthwave', 'Lo-Fi', 'EDM', 'Ambient', 'Techno', 'Drum & Bass'];
   
   // Filter repositories based on search and filters
   const filteredRepositories = repositories.filter(repo => {
     const matchesSearch = 
-      repo.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      repo.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       repo.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      repo.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      repo.ownerUsername.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (repo.genre && repo.genre.toLowerCase().includes(searchQuery.toLowerCase()));
       
     const matchesGenre = filters.genre === 'all' || 
