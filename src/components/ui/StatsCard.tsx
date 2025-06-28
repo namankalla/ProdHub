@@ -37,4 +37,8 @@ const StatsCard: React.FC<StatsCardProps> = ({
   );
 };
 
+<<<<<<< Updated upstream
 export default StatsCard; 
+=======
+export default StatsCard;
+>>>>>>> Stashed changes

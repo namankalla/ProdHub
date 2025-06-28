@@ -6,4 +6,8 @@ const ConnectsPage: React.FC = () => (
   </div>
 );
 
+<<<<<<< Updated upstream
 export default ConnectsPage; 
+=======
+export default ConnectsPage;
+>>>>>>> Stashed changes

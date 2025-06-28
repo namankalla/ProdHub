@@ -55,4 +55,8 @@ export const updateUserProfile = async (uid: string, data: Partial<User>): Promi
     console.error('Error updating user profile:', error);
     throw error;
   }
+<<<<<<< Updated upstream
 }; 
+=======
+};
+>>>>>>> Stashed changes

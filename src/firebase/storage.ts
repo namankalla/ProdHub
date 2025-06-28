@@ -22,9 +22,14 @@ export const uploadFile = async (
   onProgress?: (progress: number) => void
 ): Promise<StorageFile> => {
   try {
+<<<<<<< Updated upstream
     const timestamp = Date.now();
     const uniqueFileName = `${timestamp}_${file.name}`;
     const fullPath = `${path}/${uniqueFileName}`;
+=======
+    const relativePath = (file as any).webkitRelativePath || file.name;
+    const fullPath = `${path}/v1/${relativePath}`; // Add v1 folder and preserve structure
+>>>>>>> Stashed changes
     const storageRef = ref(storage, fullPath);
     
     const uploadTask = uploadBytesResumable(storageRef, file);
@@ -60,6 +65,7 @@ export const uploadFile = async (
   }
 };
 
+<<<<<<< Updated upstream
 // Upload multiple files
 export const uploadMultipleFiles = async (
   files: File[],
@@ -68,16 +74,35 @@ export const uploadMultipleFiles = async (
 ): Promise<StorageFile[]> => {
   const totalFiles = files.length;
   let completedFiles = 0;
+=======
+// Upload multiple files with folder structure preservation
+export const uploadMultipleFiles = async (
+  files: File[],
+  basePath: string,
+  onProgress?: (percentage: number) => void
+): Promise<StorageFile[]> => {
+  const totalBytes = files.reduce((sum, file) => sum + file.size, 0);
+  let uploadedBytes = 0;
+>>>>>>> Stashed changes
   const results: StorageFile[] = [];
 
   for (const file of files) {
     try {
+<<<<<<< Updated upstream
       const result = await uploadFile(file, path, (progress) => {
         const overallProgress = ((completedFiles + progress / 100) / totalFiles) * 100;
         onProgress?.(Math.round(overallProgress));
       });
       results.push(result);
       completedFiles++;
+=======
+      const result = await uploadFile(file, basePath, (progress) => {
+        const overallProgress = ((uploadedBytes + (progress / 100) * file.size) / totalBytes) * 100;
+        onProgress?.(Math.round(overallProgress));
+      });
+      results.push(result);
+      uploadedBytes += file.size;
+>>>>>>> Stashed changes
     } catch (error) {
       console.error(`Error uploading file ${file.name}:`, error);
       throw error;
@@ -114,4 +139,8 @@ export const STORAGE_PATHS = {
   REPOSITORY_FILES: (repoId: string, branchId: string) => `repositories/${repoId}/branches/${branchId}`,
   USER_UPLOADS: (userId: string) => `uploads/${userId}`,
   PUBLIC_ASSETS: 'public'
+<<<<<<< Updated upstream
 }; 
+=======
+};
+>>>>>>> Stashed changes

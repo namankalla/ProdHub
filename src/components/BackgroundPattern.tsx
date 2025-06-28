@@ -55,4 +55,8 @@ const BackgroundPattern: React.FC = () => {
   );
 };
 
+<<<<<<< Updated upstream
 export default BackgroundPattern; 
+=======
+export default BackgroundPattern;
+>>>>>>> Stashed changes

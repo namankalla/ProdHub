@@ -6,6 +6,7 @@ service firebase.storage {
     function isAuthenticated() {
       return request.auth != null;
     }
+<<<<<<< Updated upstream
     
     function isValidFileType() {
       return request.resource.contentType.matches('image/.*|video/.*|audio/.*|application/.*');
@@ -69,12 +70,110 @@ service firebase.storage {
         && request.auth.uid == userId
         && isValidFileType()
         && request.resource.size < 50 * 1024 * 1024; // 50MB max for temporary uploads
+=======
+
+    function isValidFileType() {
+      return request.resource.contentType.matches('image/.*')
+          || request.resource.contentType.matches('video/.*')
+          || request.resource.contentType.matches('audio/.*')
+          || request.resource.contentType.matches('text/.*')
+          || request.resource.contentType.matches('application/pdf')
+          || request.resource.contentType.matches('application/json')
+          || request.resource.contentType.matches('application/javascript')
+          || request.resource.contentType.matches('application/zip')
+          || request.resource.contentType.matches('application/octet-stream')
+          || request.resource.contentType == null; // Allow files with no content type (like .flp)
+    }
+
+    function isValidFileSize(maxSizeMB) {
+      return request.resource.size < maxSizeMB * 1024 * 1024;
+    }
+
+    function isChatParticipant(chatId) {
+      return exists(/databases/(default)/documents/chats/$(chatId)) &&
+             get(/databases/(default)/documents/chats/$(chatId)).data.users.hasAny([request.auth.uid]);
+    }
+
+    function isRepositoryOwner(repoId) {
+      return exists(/databases/(default)/documents/repositories/$(repoId)) &&
+             get(/databases/(default)/documents/repositories/$(repoId)).data.ownerId == request.auth.uid;
+    }
+
+    function isRepositoryCollaborator(repoId) {
+      return exists(/databases/(default)/documents/repositories/$(repoId)) &&
+             get(/databases/(default)/documents/repositories/$(repoId)).data.collaborators.hasAny([request.auth.uid]);
+    }
+
+    // Chat media files
+    match /chatMedia/{chatId}/{fileName} {
+      allow read, write: if isAuthenticated()
+                         && isChatParticipant(chatId)
+                         && isValidFileType()
+                         && isValidFileSize(100);
+    }
+
+    // User profile images (new path structure)
+    match /users/{userId}/profile/{filePath=**} {
+      allow read: if true;
+      allow write, delete: if isAuthenticated()
+                   && request.auth.uid == userId
+                   && (request.resource == null || (
+                     request.resource.contentType.matches('image/.*')
+                     && isValidFileSize(5)
+                   ));
+    }
+
+    // Legacy profile images path
+    match /profileImages/{userId} {
+      allow read: if true;
+      allow write, delete: if isAuthenticated()
+                   && request.auth.uid == userId
+                   && (request.resource == null || (
+                     request.resource.contentType.matches('image/.*')
+                     && isValidFileSize(5)
+                   ));
+    }
+
+    // Repository files - updated to handle nested paths
+    match /repositories/{repoId}/{filePath=**} {
+      allow read: if isAuthenticated()
+                  && (isRepositoryOwner(repoId) || isRepositoryCollaborator(repoId));
+      allow write: if isAuthenticated()
+                   && isRepositoryOwner(repoId)
+                   && isValidFileType()
+                   && isValidFileSize(100);
+    }
+
+    // User uploads
+    match /uploads/{userId}/{fileName} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated()
+                   && request.auth.uid == userId
+                   && isValidFileType()
+                   && isValidFileSize(100);
+    }
+
+    // Temporary uploads
+    match /temp/{userId}/{fileName} {
+      allow read: if isAuthenticated() && request.auth.uid == userId;
+      allow write: if isAuthenticated()
+                   && request.auth.uid == userId
+                   && isValidFileType()
+                   && isValidFileSize(50);
+>>>>>>> Stashed changes
     }
 
     // Public assets
     match /public/{fileName} {
       allow read: if true;
+<<<<<<< Updated upstream
       allow write: if false; // Only admin can write public assets
     }
   }
 } 
+=======
+      allow write: if false;
+    }
+  }
+}
+>>>>>>> Stashed changes

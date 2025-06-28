@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 import React, { useState, useEffect } from 'react';
 import { useParams, Routes, Route } from 'react-router-dom';
 import { Star, GitBranch, Share2, Download, GitFork, Music2, Info } from 'lucide-react';
@@ -179,32 +180,120 @@ const RepositoryPage: React.FC = () => {
                 </div>
               </div>
             </div>
+=======
+// BEST REPOSITORY PAGE IN THE WORLD — Custom Built for ProdHub
+
+import React, { useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import AudioPlayer from '../components/Repository/AudioPlayer';
+import BranchSelector from '../components/Repository/BranchSelector';
+import CommitHistory from '../components/Repository/CommitHistory';
+import { Star, GitFork, Download, Music2, Share2, Lock, Globe, Settings, FileText } from 'lucide-react';
+
+const branches = [
+  { id: 'main', name: 'main', isDefault: true },
+  { id: 'dev', name: 'dev' },
+  { id: 'mix', name: 'mix' },
+];
+
+const commits = [
+  {
+    id: 'abc123',
+    message: 'Initial commit with beat structure',
+    author: 'Naman K',
+    date: '2 hours ago',
+    avatar: 'https://randomuser.me/api/portraits/men/2.jpg',
+  },
+  {
+    id: 'def456',
+    message: 'Layered synth and adjusted EQ',
+    author: 'Naman K',
+    date: '1 hour ago',
+    avatar: 'https://randomuser.me/api/portraits/men/2.jpg',
+  },
+];
+
+const RepositoryPage: React.FC = () => {
+  const { repoId } = useParams();
+  const [currentBranch, setCurrentBranch] = useState('main');
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black text-white p-8 space-y-8">
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="max-w-6xl mx-auto"
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-3xl font-bold">ProdHub / My Beat Project</h1>
+            <p className="text-sm text-gray-400">by @naman_k | FL Studio 21 | Genre: Trap | BPM: 150</p>
+          </div>
+
+          <div className="flex gap-2">
+            <button className="flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg">
+              <Download className="h-4 w-4 mr-2" /> Download
+            </button>
+            <button className="flex items-center px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg">
+              <Share2 className="h-4 w-4 mr-2" /> Share
+            </button>
+            <button className="flex items-center px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg">
+              <Settings className="h-4 w-4 mr-2" /> Settings
+            </button>
+>>>>>>> Stashed changes
           </div>
         </div>
-        
-        {/* Repository Navigation */}
-        <div className="flex flex-wrap items-center justify-between border-b border-gray-700 mb-6 pb-2">
-          <div className="flex space-x-1 overflow-x-auto no-scrollbar">
-            <BranchSelector 
+
+        {/* Audio Preview */}
+        <AudioPlayer
+          audioUrl="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
+          title="Project Preview"
+        />
+
+        {/* Repo Metadata */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+          <div className="bg-gray-800 rounded-xl p-6 space-y-3 shadow-xl">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-400">Stars</span>
+              <span className="flex items-center text-purple-400 font-medium">
+                <Star className="h-4 w-4 mr-1" /> 45
+              </span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-400">Forks</span>
+              <span className="flex items-center text-cyan-400 font-medium">
+                <GitFork className="h-4 w-4 mr-1" /> 12
+              </span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-400">Visibility</span>
+              <span className="flex items-center text-gray-300 font-medium">
+                <Lock className="h-4 w-4 mr-1" /> Private
+              </span>
+            </div>
+          </div>
+
+          <div className="bg-gray-800 rounded-xl p-6 space-y-3 shadow-xl">
+            <div className="text-sm text-gray-400">Description</div>
+            <p className="text-base text-gray-200">
+              This is a trap beat project with heavy 808s, ambient textures, and layered synths. Inspired by Travis Scott x Don Toliver.
+            </p>
+          </div>
+
+          <div className="bg-gray-800 rounded-xl p-6 space-y-3 shadow-xl">
+            <div className="text-sm text-gray-400 mb-2">Active Branch</div>
+            <BranchSelector
               branches={branches}
-              currentBranch={currentBranchId}
-              onBranchChange={setCurrentBranchId}
-              onCreateBranch={() => console.log("Create new branch")}
+              currentBranch={currentBranch}
+              onBranchChange={(id) => setCurrentBranch(id)}
+              onCreateBranch={() => alert('Create new branch')}
             />
           </div>
-          
-          <div className="flex items-center space-x-3 mt-3 md:mt-0">
-            <button className="flex items-center space-x-1 bg-gray-800 hover:bg-gray-750 text-white py-1.5 px-3 rounded-md transition-colors">
-              <Download className="h-4 w-4 text-gray-400" />
-              <span>Download</span>
-            </button>
-            
-            <button className="flex items-center space-x-1 bg-purple-600 hover:bg-purple-700 text-white py-1.5 px-4 rounded-md transition-colors">
-              <GitBranch className="h-4 w-4" />
-              <span>New Commit</span>
-            </button>
-          </div>
         </div>
+<<<<<<< Updated upstream
         
         {/* Repository Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -287,82 +376,38 @@ const RepositoryPage: React.FC = () => {
                 </p>
               </div>
             </div>
+=======
+
+        {/* Commit History */}
+        <div className="mt-12">
+          <CommitHistory commits={commits} currentBranch={currentBranch} />
+        </div>
+
+        {/* Project Files */}
+        <div className="mt-12 bg-gray-800 p-6 rounded-xl shadow-md">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold text-white">Project Files</h2>
+            <button className="text-sm text-purple-400 hover:underline">Upload New</button>
+>>>>>>> Stashed changes
           </div>
-          
-          {/* Sidebar */}
-          <div className="space-y-8">
-            {/* Commit History */}
-            <CommitHistory 
-              commits={commits}
-              currentBranch={branches.find(b => b.id === currentBranchId)?.name || 'main'}
-            />
-            
-            {/* About Repo */}
-            <div className="bg-gray-800 rounded-lg overflow-hidden shadow-md border border-gray-700">
-              <div className="px-4 py-3 border-b border-gray-700">
-                <h2 className="text-lg font-medium text-white">About</h2>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between py-2 border-b border-gray-700">
+              <div className="flex items-center space-x-2">
+                <FileText className="h-5 w-5 text-gray-400" />
+                <span className="text-gray-300">TrapMix_808_v2.flp</span>
               </div>
-              <div className="p-4 space-y-4">
-                <div>
-                  <h3 className="text-sm font-medium text-gray-400 mb-1">Owner</h3>
-                  <div className="flex items-center">
-                    <div className="h-6 w-6 rounded-full overflow-hidden mr-2">
-                      <img 
-                        src="https://images.pexels.com/photos/7149165/pexels-photo-7149165.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=30&w=30" 
-                        alt={username} 
-                        className="h-full w-full object-cover"
-                      />
-                    </div>
-                    <Link href={`/${username}`} className="text-white hover:text-purple-400 transition-colors">
-                      {username}
-                    </Link>
-                  </div>
-                </div>
-                
-                <div>
-                  <h3 className="text-sm font-medium text-gray-400 mb-1">Created</h3>
-                  <div className="text-white">March 15, 2025</div>
-                </div>
-                
-                <div>
-                  <h3 className="text-sm font-medium text-gray-400 mb-1">License</h3>
-                  <div className="text-white">Creative Commons Attribution</div>
-                </div>
-              </div>
+              <span className="text-xs text-gray-500">Updated 30 mins ago</span>
             </div>
-            
-            {/* Contributors */}
-            <div className="bg-gray-800 rounded-lg overflow-hidden shadow-md border border-gray-700">
-              <div className="px-4 py-3 border-b border-gray-700">
-                <h2 className="text-lg font-medium text-white">Contributors</h2>
+            <div className="flex items-center justify-between py-2 border-b border-gray-700">
+              <div className="flex items-center space-x-2">
+                <Music2 className="h-5 w-5 text-gray-400" />
+                <span className="text-gray-300">Preview_Render.mp3</span>
               </div>
-              <div className="p-4">
-                <div className="flex items-center mb-3">
-                  <div className="h-8 w-8 rounded-full overflow-hidden mr-3">
-                    <img 
-                      src="https://images.pexels.com/photos/7149165/pexels-photo-7149165.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=40&w=40" 
-                      alt={username} 
-                      className="h-full w-full object-cover"
-                    />
-                  </div>
-                  <div>
-                    <Link href={`/${username}`} className="text-white hover:text-purple-400 transition-colors font-medium">
-                      {username}
-                    </Link>
-                    <div className="text-xs text-gray-400">
-                      5 commits
-                    </div>
-                  </div>
-                </div>
-                
-                <button className="w-full mt-2 text-center text-purple-400 hover:text-purple-300 text-sm font-medium transition-colors">
-                  View all contributors
-                </button>
-              </div>
+              <span className="text-xs text-gray-500">Uploaded 1 hour ago</span>
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };

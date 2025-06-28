@@ -56,4 +56,8 @@ const Sidebar: React.FC = () => {
   );
 };
 
+<<<<<<< Updated upstream
 export default Sidebar; 
+=======
+export default Sidebar;
+>>>>>>> Stashed changes

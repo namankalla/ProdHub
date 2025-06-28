@@ -28,4 +28,8 @@ const GlassCard: React.FC<GlassCardProps> = ({
   );
 };
 
+<<<<<<< Updated upstream
 export default GlassCard; 
+=======
+export default GlassCard;
+>>>>>>> Stashed changes

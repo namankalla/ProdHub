@@ -6,4 +6,8 @@ const FollowersPage: React.FC = () => (
   </div>
 );
 
+<<<<<<< Updated upstream
 export default FollowersPage; 
+=======
+export default FollowersPage;
+>>>>>>> Stashed changes

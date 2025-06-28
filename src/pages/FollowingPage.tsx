@@ -6,4 +6,8 @@ const FollowingPage: React.FC = () => (
   </div>
 );
 
+<<<<<<< Updated upstream
 export default FollowingPage; 
+=======
+export default FollowingPage;
+>>>>>>> Stashed changes

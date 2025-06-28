@@ -18,4 +18,8 @@ export const BackButton: React.FC<BackButtonProps> = ({ className = '' }) => {
       <span>Back</span>
     </button>
   );
+<<<<<<< Updated upstream
 };
+=======
+};
+>>>>>>> Stashed changes

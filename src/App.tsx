@@ -5,10 +5,15 @@ import WelcomePage from '../src/pages/WelcomePage';
 import HomePage from '../src/pages/HomePage';
 import ExplorePage from './pages/ExplorePage';
 import RepositoryPage from './pages/RepositoryPage';
+import RepositoriesPage from './pages/RepositoriesPage';
 import ProfilePage from './pages/ProfilePage';
 import AuthPage from './pages/AuthPage';
 import NotFoundPage from './pages/NotFoundPage';
 import NotificationsPage from './pages/NotificationsPage';
+<<<<<<< Updated upstream
+=======
+import SettingsPage from './pages/SettingsPage';
+>>>>>>> Stashed changes
 import Footer from './components/Footer';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { AnimatePresence } from 'framer-motion';
@@ -19,6 +24,10 @@ import ConnectsPage from './pages/ConnectsPage';
 import EditProfilePage from './pages/EditProfilePage';
 import BackgroundPattern from './components/BackgroundPattern';
 import Sidebar from './components/Sidebar';
+<<<<<<< Updated upstream
+=======
+import NewRepoPage from './pages/NewRepoPage';
+>>>>>>> Stashed changes
 
 // Protected Route component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -86,6 +95,14 @@ function App() {
                     <HomePage />
                   </ProtectedRoute>
                 } />
+<<<<<<< Updated upstream
+=======
+                <Route path="/repositories" element={
+                  <ProtectedRoute>
+                    <RepositoriesPage />
+                  </ProtectedRoute>
+                } />
+>>>>>>> Stashed changes
                 <Route path="/explore" element={
                   <ProtectedRoute>
                     <ExplorePage />
@@ -101,6 +118,7 @@ function App() {
                     <MessagesPage />
                   </ProtectedRoute>
                 } />
+<<<<<<< Updated upstream
                 <Route path="/:username" element={
                   <ProtectedRoute>
                     <ProfilePage />
@@ -111,6 +129,8 @@ function App() {
                     <RepositoryPage />
                   </ProtectedRoute>
                 } />
+=======
+>>>>>>> Stashed changes
                 <Route path="/followers" element={
                   <ProtectedRoute>
                     <FollowersPage />
@@ -131,7 +151,31 @@ function App() {
                     <EditProfilePage />
                   </ProtectedRoute>
                 } />
+<<<<<<< Updated upstream
                 <Route path="PNF" element={<NotFoundPage />} />
+=======
+                <Route path="/settings" element={
+                  <ProtectedRoute>
+                    <SettingsPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/new-repo" element={
+                  <ProtectedRoute>
+                    <NewRepoPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/:username/:repoName/*" element={
+                  <ProtectedRoute>
+                    <RepositoryPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/:username" element={
+                  <ProtectedRoute>
+                    <ProfilePage />
+                  </ProtectedRoute>
+                } />
+                <Route path="*" element={<NotFoundPage />} />
+>>>>>>> Stashed changes
               </Routes>
             </AnimatePresence>
           </Layout>

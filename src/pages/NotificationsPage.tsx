@@ -141,4 +141,8 @@ const NotificationsPage: React.FC = () => {
   );
 };
 
+<<<<<<< Updated upstream
 export default NotificationsPage; 
+=======
+export default NotificationsPage;
+>>>>>>> Stashed changes

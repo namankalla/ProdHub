@@ -8,7 +8,11 @@ const firebaseConfig = {
   apiKey: "AIzaSyDTgdZDyNWEeBTf7a7I8IiaZO1wSGZkJqk",
   authDomain: "prodhub-4d8ef.firebaseapp.com",
   projectId: "prodhub-4d8ef",
+<<<<<<< Updated upstream
   storageBucket: "prodhub-4d8ef.firebasestorage.com",
+=======
+  storageBucket: "prodhub-4d8ef.firebasestorage.app",
+>>>>>>> Stashed changes
   messagingSenderId: "1040135094109",
   appId: "1:1040135094109:web:054570cba0577300faf2b4"
 };
